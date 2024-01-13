@@ -1,0 +1,29 @@
+body {
+  font-family: Arial, sans-serif;
+}
+
+form {
+  margin-bottom: 1em;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+table,
+th,
+td {
+  border: 1px solid black;
+}
+
+th,
+td {
+  padding: 0.5em;
+  text-align: left;
+}
+
+img {
+  max-width: 100px;
+  height: auto;
+}
