@@ -9,7 +9,11 @@
 </head>
 
 <body>
+  <div id="message" style="display: none;"></div>
+
   <?php
+  session_start();
+
   include 'client/ClientHttp.php';
   include 'database/DB.php';
 
@@ -17,21 +21,27 @@
   $db = new DB();
 
   $movies = [];
-
   $showFavoritos = false;
-
   $error = '';
-
-  $message = '';
 
   if (isset($_POST['buscar_web'])) {
     $movieName = $_POST['movie_name_web'];
+
+    $_SESSION['movie_name_web'] = $movieName;
 
     $data = $client->getMovieData($movieName);
 
     if ($data['Response'] == 'False') {
       $error = "ERROR: {$data['Error']}";
     } else {
+      $movies = $data['Search'];
+    }
+  } else if (isset($_SESSION['movie_name_web'])) {
+    $movieName = $_SESSION['movie_name_web'];
+
+    $data = $client->getMovieData($movieName);
+
+    if ($data['Response'] == 'True') {
       $movies = $data['Search'];
     }
   }
@@ -44,9 +54,9 @@
       'Poster' => $_POST['poster_m']
     ];
 
-    $db->insertFavorito($movieData);
+    $message = $db->insertFavorito($movieData);
 
-    $message = 'Favorito agregado correctamente';
+    echo "<script type='text/javascript'>alert('$message');</script>";
   }
 
   if (isset($_POST['show_favoritos'])) {
@@ -61,15 +71,6 @@
     <button type="submit" name="buscar_web" id="buscar_web">Buscar</button>
     <button type="submit" name="show_favoritos">Mostrar favoritos</button>
   </form>
-
-  <?php if (!empty($message)) : ?>
-    <p>
-      <?php
-      echo $message;
-      return;
-      ?>
-    </p>
-  <?php endif; ?>
 
   <?php if (!empty($error)) : ?>
     <p><?php echo $error; ?></p>
@@ -127,8 +128,6 @@
       </tbody>
     </table>
   <?php endif; ?>
-
-  <script src="js/functions.js"></script>
 </body>
 
 </html>

@@ -31,6 +31,21 @@ class DB
   public function insertFavorito($movieData)
   {
     try {
+      // Verificar si el favorito ya existe
+
+      $sql = "SELECT * FROM favoritos WHERE title_m = ? AND year_m = ? AND type_m = ? AND poster_m = ?";
+
+      $stmt = $this->pdo->prepare($sql);
+
+      $stmt->execute([$movieData["Title"], $movieData["Year"], $movieData["Type"], $movieData["Poster"]]);
+
+      $existingFavorito = $stmt->fetch();
+
+      if ($existingFavorito) {
+        return 'El favorito ya existe';
+      }
+
+      // Insertar el favorito
       $sql = "INSERT INTO favoritos (id, title_m, year_m, type_m, poster_m) VALUES (NULL, ?, ?, ?, ?)";
 
       $stmt = $this->pdo->prepare($sql);
@@ -40,8 +55,7 @@ class DB
       return 'Favorito insertado correctamente';
     } catch (\PDOException $e) {
       error_log($e->getMessage());
-
-      throw new \PDOException("Error insertando los favoritos", (int)$e->getCode());
+      throw new \PDOException("Error insertando los favoritos.", (int)$e->getCode());
     }
   }
 
