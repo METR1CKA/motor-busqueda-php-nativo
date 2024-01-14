@@ -7,6 +7,7 @@ class DB
   private $pass = '';
   private $pdo;
 
+  // Constructor: establece la conexión a la base de datos
   public function __construct()
   {
     $dsn = "mysql:host=$this->host;dbname=$this->db";
@@ -22,34 +23,47 @@ class DB
     } catch (\PDOException $e) {
       error_log($e->getMessage());
 
-      throw new \PDOException("Error connecting to the database. Please check the logs.", (int)$e->getCode());
+      throw new \PDOException("Error al conectar la BD", (int)$e->getCode());
     }
   }
 
+  // Inserta una película en la tabla de favoritos
   public function insertFavorito($movieData)
   {
-    $sql = "INSERT INTO favoritos (Title, Year, Type, Poster) VALUES (?, ?, ?, ?)";
+    try {
+      $sql = "INSERT INTO favoritos (id, title_m, year_m, type_m, poster_m) VALUES (NULL, ?, ?, ?, ?)";
 
-    $stmt = $this->pdo->prepare($sql);
+      $stmt = $this->pdo->prepare($sql);
 
-    $stmt->execute([$movieData["Title"], $movieData["Year"], $movieData["Type"], $movieData["Poster"]]);
+      $stmt->execute([$movieData["Title"], $movieData["Year"], $movieData["Type"], $movieData["Poster"]]);
 
-    return $this->pdo->lastInsertId();
+      return 'Favorito insertado correctamente';
+    } catch (\PDOException $e) {
+      error_log($e->getMessage());
+
+      throw new \PDOException("Error insertando los favoritos", (int)$e->getCode());
+    }
   }
 
+  // Obtiene todas las películas de la tabla de favoritos
   public function getFavoritos()
   {
-    $sql = "SELECT * FROM favoritos";
+    try {
+      $sql = "SELECT * FROM favoritos";
 
-    $stmt = $this->pdo->prepare($sql);
+      $stmt = $this->pdo->prepare($sql);
 
-    $stmt->execute();
+      $stmt->execute();
 
-    $favoritos = $stmt->fetchAll();
+      return $stmt->fetchAll();
+    } catch (\PDOException $e) {
+      error_log($e->getMessage());
 
-    return $favoritos;
+      throw new \PDOException("Error obteniendo los favoritos", (int)$e->getCode());
+    }
   }
 
+  // Destructor: cierra la conexión a la base de datos
   public function __destruct()
   {
     // Cerrar la conexión a la base de datos
