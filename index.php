@@ -61,9 +61,9 @@
 
   if (isset($_POST['show_favoritos'])) {
     $showFavoritos = true;
-  }
 
-  $favoritos = $db->getFavoritos();
+    $favoritos = $db->getFavoritos();
+  }
   ?>
 
   <form method="POST">
