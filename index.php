@@ -1,22 +1,3 @@
-<?php
-include 'client/ClientHttp.php';
-include 'database/DB.php';
-
-$client = new ClientHttp();
-$db = new DB();
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  $movieName = $_POST['movieName'];
-  $data = $client->getMovieData($movieName);
-  $movies = $data['Search'];
-  foreach ($movies as $movie) {
-    $db->insertFavorito($movie);
-  }
-}
-
-$favoritos = $db->getFavoritos();
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -28,31 +9,59 @@ $favoritos = $db->getFavoritos();
 </head>
 
 <body>
+  <?php
+  include 'client/ClientHttp.php';
+  include 'database/DB.php';
+
+  $client = new ClientHttp();
+  $db = new DB();
+
+  $movies = [];
+
+  $error = '';
+
+  if (isset($_POST['buscar_web'])) {
+    $movieName = $_POST['movie_name_web'];
+
+    $data = $client->getMovieData($movieName);
+
+    if ($data['Response'] == 'False') {
+      $error = "ERROR: {$data['Error']}";
+    } else {
+      $movies = $data['Search'];
+    }
+  }
+  ?>
+
   <form method="POST">
-    <input type="text" name="movieName" placeholder="Nombre de la película">
-    <button type="submit">Buscar</button>
+    <input type="text" name="movie_name_web" id="movie_name_web" placeholder="Nombre de la película">
+    <button type="submit" name="buscar_web" id="buscar_web">Buscar</button>
   </form>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Título</th>
-        <th>Año</th>
-        <th>Tipo</th>
-        <th>Poster</th>
-      </tr>
-    </thead>
-    <tbody>
-      <?php foreach ($favoritos as $favorito) : ?>
+  <?php if (!empty($error)) : ?>
+    <p><?php echo $error; ?></p>
+  <?php else : ?>
+    <table>
+      <thead>
         <tr>
-          <td><?php echo $favorito['Title']; ?></td>
-          <td><?php echo $favorito['Year']; ?></td>
-          <td><?php echo $favorito['Type']; ?></td>
-          <td><img src="<?php echo $favorito['Poster']; ?>" alt="<?php echo $favorito['Title']; ?>"></td>
+          <th>Título</th>
+          <th>Año</th>
+          <th>Tipo</th>
+          <th>Poster</th>
         </tr>
-      <?php endforeach; ?>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        <?php foreach ($movies as $movie) : ?>
+          <tr>
+            <td><?php echo $movie['Title']; ?></td>
+            <td><?php echo $movie['Year']; ?></td>
+            <td><?php echo $movie['Type']; ?></td>
+            <td><img src="<?php echo $movie['Poster']; ?>" alt="<?php echo $movie['Title']; ?>"></td>
+          </tr>
+        <?php endforeach; ?>
+      </tbody>
+    </table>
+  <?php endif; ?>
 
   <script src="js/functions.js"></script>
 </body>
