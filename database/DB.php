@@ -7,8 +7,7 @@ class DB
   private $pass = '';
   private $pdo;
 
-  // Constructor: establece la conexión a la base de datos
-  public function __construct()
+  public function connectDB()
   {
     $dsn = "mysql:host=$this->host;dbname=$this->db";
 
@@ -20,11 +19,14 @@ class DB
 
     try {
       $this->pdo = new PDO($dsn, $this->user, $this->pass, $options);
-    } catch (\PDOException $e) {
-      error_log($e->getMessage());
-
-      throw new \PDOException("Error al conectar la BD", (int)$e->getCode());
+    } catch (PDOException $e) {
+      return $e;
     }
+  }
+
+  public function checkConnection()
+  {
+    return $this->pdo ? true : false;
   }
 
   // Inserta una película en la tabla de favoritos
@@ -55,7 +57,8 @@ class DB
       return 'Favorito insertado correctamente';
     } catch (\PDOException $e) {
       error_log($e->getMessage());
-      throw new \PDOException("Error insertando los favoritos.", (int)$e->getCode());
+
+      return 'Error insertando los favoritos';
     }
   }
 
@@ -73,7 +76,7 @@ class DB
     } catch (\PDOException $e) {
       error_log($e->getMessage());
 
-      throw new \PDOException("Error obteniendo los favoritos", (int)$e->getCode());
+      return false;
     }
   }
 
